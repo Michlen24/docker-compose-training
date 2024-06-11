@@ -18,13 +18,9 @@
 
     <?php
     $conn = mysqli_connect('db', 'user', 'test', 'myDb');
-
     if (mysqli_connect_errno()) {
-      echo "Failed to connect to MySQL: " . mysqli_connect_error();
       exit();
     }
-
-    echo("hhh");
 
     $query = "SELECT * From Person";
     $result = mysqli_query($conn, $query);
@@ -42,11 +38,32 @@
         echo '</tr>';
     }
     echo '</table>';
-
     $result->close();
-
     mysqli_close($conn);
 
+    $pgsql_conn = pg_connect("host=postgres dbname=myDb user=user password=test");
+    if (!$pgsql_conn) {
+      exit();
+    }
+
+    $pgsql_query = "SELECT * FROM Person";
+    $pgsql_result = pg_query($pgsql_conn, $pgsql_query);
+
+    if (!$pgsql_result) {
+      exit();
+    }
+
+    echo '<table class="table table-striped">';
+    echo '<thead><tr><th>id</th><th>name</th></tr></thead>';
+    while ($row = pg_fetch_assoc($pgsql_result)) {
+        echo '<tr>';
+        echo '<td>' . $row['id'] . '</td>';
+        echo '<td>' . $row['name'] . '</td>';
+        echo '</tr>';
+    }
+    echo '</table>';
+    pg_free_result($pgsql_result);
+    pg_close($pgsql_conn);
     ?>
     </div>
 </body>

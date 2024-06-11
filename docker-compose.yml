@@ -2,19 +2,21 @@ version: "2"
 services:
     www:
         build: .
-        ports: 
+        ports:
             - "8001:80"
         volumes:
             - ./www:/var/www/html/
         links:
             - db
+            - postgres
         networks:
             - default
         depends_on:
             - db
+            - postgres
     db:
         image: mysql:5.7.13
-        ports: 
+        ports:
             - "3306:3306"
         environment:
             MYSQL_DATABASE: myDb
@@ -22,13 +24,13 @@ services:
             MYSQL_PASSWORD: test
             MYSQL_ROOT_PASSWORD: test
         volumes:
-            - ./dump:/docker-entrypoint-initdb.d
+            - ./dump/mysql:/docker-entrypoint-initdb.d
             - persistent:/var/lib/mysql
         networks:
             - default
     phpmyadmin:
         image: phpmyadmin
-        links: 
+        links:
             - db:db
         ports:
             - 8000:80
@@ -36,7 +38,20 @@ services:
             MYSQL_USER: user
             MYSQL_PASSWORD: test
             MYSQL_ROOT_PASSWORD: test
+    postgres:
+        image: postgres:13.15-alpine3.20
+        environment:
+            POSTGRES_DB: myDb
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: test
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./dump/postgres:/docker-entrypoint-initdb.d
+            - postgres-data:/var/lib/postgresql/data
+        networks:
+            - default
 
-            
 volumes:
     persistent:
+    postgres-data:
